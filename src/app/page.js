@@ -2,29 +2,62 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Input, Button } from "@nextui-org/react";
-import { Search } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import { apiUrl } from "@/utils/apiUrl";
+import Leaderboards from "@/components/Leaderboards";
 
 export default function Home() {
   const [users, setUsers] = useState([]);
   const [searchUser, setSearchUser] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const sendUser = async (user) => {
-    const createUser = async () => {
+  const sendUser = async (userParam) => {
+    let user;
+    const readUser = async () => {
       try {
-        const res = await axios.get(`https://pixels-server.pixels.xyz/v1/player?username=${user}`);
-        console.log(res);
+        const res = await axios.get(`${apiUrl}/players/${userParam}`);
+        user = res.data.player;
+        setSearchUser("");
+        return user;
+      } catch (error) {
+        console.error(error);
+        if (error.response && error.response.status === 500) {
+          try {
+            const res = await axios.get(
+              `http://www.pixels-tools.somee.com/Actualizar/${userParam}`
+            );
+            user = res.data.player;
+            setSearchUser("");
+            return user;
+          } catch (error) {
+            console.error(error);
+            return null;
+          }
+        }
+      }
+    };
+    user = await readUser();
+    if (!user) return;
+    const { _id, username, levels } = user;
+    const userBody = { key: _id, _id: _id, username: username, levels: levels };
+    const uploadUser = async () => {
+      try {
+        await axios.post(`${apiUrl}/rojanelos/create`, userBody);
+        setLoading(!loading);
+        setSearchUser("");
       } catch (error) {
         console.error(error);
       }
     };
-    createUser()
+    uploadUser();
+    setSearchUser("");
   };
 
   const getUsers = async () => {
     try {
       const res = await axios.get(`${apiUrl}/rojanelos`);
       setUsers(res.data.players);
+      console.log(res.data.players);
     } catch (error) {
       console.error(error);
     }
@@ -32,7 +65,7 @@ export default function Home() {
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [loading]);
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -44,7 +77,7 @@ export default function Home() {
       <form className="flex w-full items-center gap-3" onSubmit={handleSearch}>
         <Input
           size="sm"
-          label="Nickname"
+          label="Agregar Rojanelo"
           value={searchUser}
           onValueChange={(value) => setSearchUser(value)}
         />
@@ -56,13 +89,27 @@ export default function Home() {
           radius="full"
           color="primary"
         >
-          <Search />
+          <UserPlus />
         </Button>
       </form>
-      {users.length > 0 &&
-        users.map(({ _id, username, skills }) => (
-          <div key={_id}>{username}</div>
-        ))}
+      {/* {users.length > 0 &&
+        users.map(({ _id, username, levels }) => (
+          <div key={_id}>
+            {username}
+            {levels.map((skillsObject, index) => (
+              <div key={index}>
+                {Object.entries(skillsObject).map(([skill, data]) => (
+                  <div key={skill}>
+                    <p>
+                      {skill}: {data.level}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))} */}
+      <Leaderboards users={users} />
     </div>
   );
 }
