@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import {
   Table,
   TableHeader,
@@ -6,10 +7,11 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  getKeyValue,
 } from "@nextui-org/react";
 
-export const Tables = ({ users, filter }) => {
+export const Tables = ({ users }) => {
+  const [selectedColor, setSelectedColor] = useState("warning");
+
   const rows = users;
 
   const columns = [
@@ -18,48 +20,91 @@ export const Tables = ({ users, filter }) => {
       label: "ROJANELO",
     },
     {
-      key: "skills",
-      label: "LVL SKILL",
+      key: "totalsLevels",
+      label: "TOTAL LEVELS",
     },
-  ];
+    {
+      key: "aviculture",
+      label: "Aviculture",
+    },
+    {
+      key: "beekeeping",
+      label: "Beekeeping",
+    },
+    {
+      key: "farming",
+      label: "Farming",
+    },
+    {
+      key: "forestry",
+      label: "Forestry",
+    },
+    {
+      key: "mining",
+      label: "Mining",
+    },
+    {
+      key: "ceramicist",
+      label: "Ceramicist",
+    },
+    {
+      key: "cooking",
+      label: "Cooking",
+    },
+    {
+      key: "granger",
+      label: "Granger",
+    },
+    {
+      key: "textiler",
+      label: "Textiler",
+    },
+    {
+      key: "winemaking",
+      label: "Winemaking",
+    },
+    {
+      key: "woodwork",
+      label: "Woodwork",
+    },
+  ].map((column) => ({
+    ...column,
+    label: column.label.toUpperCase(),
+  }));
 
   return (
-    <Table aria-label="Leaderboard de Rojanelos" isStriped>
-      <TableHeader columns={columns}>
-        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+    <Table
+      aria-label="Leaderboard of all skills"
+      color={selectedColor}
+      selectionMode="single"
+      defaultSelectedKeys={["654e6637e4b98175b45feda2"]}
+    >
+      <TableHeader>
+        {columns.map(({ key, label }) => (
+          <TableColumn key={key}>{label}</TableColumn>
+        ))}
       </TableHeader>
-      <TableBody items={rows}>
-        {(item) => (
-          <TableRow key={item.key}>
-            {(columnKey) => (
-              <TableCell key={columnKey}>
-                {columnKey === "skills"
-                  ? filter === "all-skills"
-                    ? item.levels.map((skillsObject, index) => {
-                        const totalPoints = Object.values(skillsObject).reduce(
-                          (acc, { level }) => acc + level,
-                          0
-                        );
-                        return (
-                          <div key={index} className="flex">
-                            <p>{totalPoints}</p>
-                          </div>
-                        );
-                      })
-                    : item.levels
-                        .filter((skillsObject) =>
-                          Object.keys(skillsObject).includes(filter)
-                        )
-                        .map((filteredSkill, index) => (
-                          <div key={index} className="flex">
-                            <p>{filteredSkill[filter].level}</p>
-                          </div>
-                        ))
-                  : getKeyValue(item, columnKey)}
-              </TableCell>
-            )}
+      <TableBody>
+        {rows.map(({ key, username, totalsLevels, skills }, index) => (
+          <TableRow key={key} className={index < 5 ? "text-success" : ""}>
+            {columns.map(({ key: columnKey }) => {
+              if (columnKey === "username") {
+                return <TableCell key={columnKey}>{username}</TableCell>;
+              } else if (columnKey === "totalsLevels") {
+                return <TableCell key={columnKey}>{totalsLevels}</TableCell>;
+              } else {
+                const skillLevel = skills.find(
+                  (skill) => skill.name === columnKey
+                );
+                return (
+                  <TableCell key={columnKey}>
+                    {skillLevel ? skillLevel.level : "0"}
+                  </TableCell>
+                );
+              }
+            })}
           </TableRow>
-        )}
+        ))}
       </TableBody>
     </Table>
   );
