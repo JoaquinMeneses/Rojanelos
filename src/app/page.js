@@ -92,23 +92,6 @@ export default function Home() {
           <UserPlus />
         </Button>
       </form>
-      {/* {users.length > 0 &&
-        users.map(({ _id, username, levels }) => (
-          <div key={_id}>
-            {username}
-            {levels.map((skillsObject, index) => (
-              <div key={index}>
-                {Object.entries(skillsObject).map(([skill, data]) => (
-                  <div key={skill}>
-                    <p>
-                      {skill}: {data.level}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        ))} */}
       <Leaderboards users={users} />
     </div>
   );

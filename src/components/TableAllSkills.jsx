@@ -9,7 +9,7 @@ import {
   TableCell,
 } from "@nextui-org/react";
 
-export const Tables = ({ users }) => {
+export const TableAllSkills = ({ users }) => {
   const [selectedColor, setSelectedColor] = useState("warning");
 
   const rows = users;
@@ -77,7 +77,7 @@ export const Tables = ({ users }) => {
       aria-label="Leaderboard of all skills"
       color={selectedColor}
       selectionMode="single"
-      defaultSelectedKeys={["654e6637e4b98175b45feda2"]}
+      defaultSelectedKeys={[""]}
     >
       <TableHeader>
         {columns.map(({ key, label }) => (
