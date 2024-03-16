@@ -8,10 +8,14 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Spinner,
 } from "@nextui-org/react";
+import { useInfiniteScroll } from "@nextui-org/use-infinite-scroll";
+
 const Specks = () => {
-  const [selectedColor, setSelectedColor] = useState("primary");
-  const [totalPages, setTotalPages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [rows, setRows] = useState([]);
   const columns = [
     {
@@ -32,35 +36,55 @@ const Specks = () => {
     },
   ];
 
+  const [loaderRef, scrollerRef] = useInfiniteScroll({
+    hasMore,
+    onLoadMore: loadMoreData,
+  });
+
+  async function fetchData() {
+    try {
+      const response = await axios.get(
+        `https://www.pixels-tools.somee.com/Speck/Page/${currentPage}`
+      );
+      setRows(response.data.listSpeck);
+      setHasMore(response.data.totalPages > 1);
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function loadMoreData() {
+    try {
+      const nextPage = currentPage + 1;
+      const response = await axios.get(
+        `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
+      );
+      const newData = response.data.listSpeck;
+      setRows((prevRows) => [...prevRows, ...newData]);
+      setCurrentPage(nextPage);
+      setHasMore(nextPage < response.data.totalPages);
+    } catch (error) {
+      console.error("Error al cargar más datos:", error);
+    }
+  }
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://www.pixels-tools.somee.com/Speck/Page/1"
-        );
-        setTotalPages(response.data.totalPages);
-        setRows(response.data.listSpeck);
-      } catch (error) {
-        console.error(error);
-      }
-    };
     fetchData();
   }, []);
 
   return (
     <Table
-      className="p-3"
+      isHeaderSticky
+      className="p-3 h-[90vh]"
       aria-label="Specks de Rojanelos"
-      color={selectedColor}
-      selectionMode="single"
-      defaultSelectedKeys={[]}
+      baseRef={scrollerRef}
+      bottomContent={hasMore ? <Spinner ref={loaderRef} color="white" /> : null}
     >
       <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn key={column.userID}>{column.label}</TableColumn>
-        )}
+        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
       </TableHeader>
-      <TableBody items={rows}>
+      <TableBody isLoading={isLoading} items={rows}>
         {(item) => (
           <TableRow key={item.userID}>
             {(columnKey) => (
