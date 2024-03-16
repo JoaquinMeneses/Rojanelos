@@ -76,9 +76,7 @@ export default function TableSpecks() {
   async function loadMoreData() {
     try {
       const nextPage = currentPage + 1;
-      const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
-      );
+      const response = await axios.get(`${apiUrl}/rojanelos/?page=${nextPage}`);
       const newData = response.data.listSpeck;
       setUsers((prevUsers) => [...prevUsers, ...newData]);
       setCurrentPage(nextPage);
@@ -259,6 +257,7 @@ export default function TableSpecks() {
 
   return (
     <Table
+      isStriped
       className="p-2"
       aria-label="Specks de Rojanelos"
       isHeaderSticky

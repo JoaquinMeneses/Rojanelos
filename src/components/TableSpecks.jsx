@@ -36,8 +36,8 @@ export default function TableSpecks() {
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "userName",
-    direction: "ascending",
+    column: "listEntitis",
+    direction: "descending",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -211,6 +211,7 @@ export default function TableSpecks() {
 
   return (
     <Table
+      isStriped
       className="p-2"
       aria-label="Specks de Rojanelos"
       isHeaderSticky
