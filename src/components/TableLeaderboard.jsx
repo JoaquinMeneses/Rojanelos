@@ -49,8 +49,8 @@ export default function TableSpecks() {
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "userName",
-    direction: "ascending",
+    column: "allSkills",
+    direction: "descending",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,11 +120,44 @@ export default function TableSpecks() {
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column];
-      const second = b[sortDescriptor.column];
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
+      let first, second;
 
-      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+      switch (sortDescriptor.column) {
+        case "allSkills":
+        case "aviculture":
+        case "beekeeping":
+        case "farming":
+        case "forestry":
+        case "mining":
+        case "slugger":
+        case "ceramicist":
+        case "cooking":
+        case "granger":
+        case "petcare":
+        case "redifferentiator":
+        case "textiler":
+        case "winemaking":
+        case "woodwork":
+          first = Math.max(
+            ...a[sortDescriptor.column].map((skill) => skill.level)
+          );
+          second = Math.max(
+            ...b[sortDescriptor.column].map((skill) => skill.level)
+          );
+          break;
+        default:
+          first = a[sortDescriptor.column];
+          second = b[sortDescriptor.column];
+      }
+
+      let cmp =
+        (parseInt(first) || first) < (parseInt(second) || second) ? -1 : 1;
+
+      if (sortDescriptor.direction === "descending") {
+        cmp *= -1;
+      }
+
+      return cmp;
     });
   }, [sortDescriptor, items]);
 
