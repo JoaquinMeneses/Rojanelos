@@ -2,12 +2,14 @@
 
 import { NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { useRouter } from "next/navigation";
 
 export function Providers({ children }) {
+  const router = useRouter();
   return (
-    <NextUIProvider>
+    <NextUIProvider navigate={router.push}>
       <NextThemesProvider attribute="class" defaultTheme="dark">
-        <main className="h-screen">{children}</main>
+        <main className="flex h-screen flex-col">{children}</main>
       </NextThemesProvider>
     </NextUIProvider>
   );

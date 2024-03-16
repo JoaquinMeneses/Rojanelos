@@ -4,16 +4,21 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
+import NavBar from "@/components/NavBar";
+
 export const metadata = {
-  title: "Rojanelos Leaderboard",
-  description: "Todos los rojanelos",
+  title: "Rojanelos",
+  description: "Todos los Rojanelos",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <NavBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
