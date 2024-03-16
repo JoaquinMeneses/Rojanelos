@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Button } from "@nextui-org/react";
 import { apiUrl } from "@/utils/apiUrl";
 
 const App = () => {
@@ -41,7 +42,9 @@ const App = () => {
 
   return (
     <div className="grid place-content-center">
-      <button onClick={() => sendUsers(watchlist)}>Cargar Usuarios</button>
+      <Button color="primary" onClick={() => sendUsers(watchlist)}>
+        Cargar Usuarios
+      </Button>
       <p>Usuarios Cargando: {loadingCount}</p>
       {users.map((userID) => (
         <div key={userID}>
