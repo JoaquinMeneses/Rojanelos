@@ -9,7 +9,9 @@ export function Providers({ children }) {
   return (
     <NextUIProvider navigate={router.push}>
       <NextThemesProvider attribute="class" defaultTheme="dark">
-        <main className="flex h-screen flex-col">{children}</main>
+        <main className="flex h-screen flex-col dark text-foreground bg-background">
+          {children}
+        </main>
       </NextThemesProvider>
     </NextUIProvider>
   );
