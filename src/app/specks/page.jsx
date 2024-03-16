@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
   Table,
@@ -8,33 +8,42 @@ import {
   TableBody,
   TableRow,
   TableCell,
+  Input,
+  Button,
+  DropdownTrigger,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
   Spinner,
 } from "@nextui-org/react";
+import { Filter, Search } from "lucide-react";
+import { capitalize } from "./utils";
 import { useInfiniteScroll } from "@nextui-org/use-infinite-scroll";
 
-const Specks = () => {
+const INITIAL_VISIBLE_COLUMNS = ["userName", "listEntitis"];
+
+export default function Specks() {
+  const columns = [
+    { name: "ROJANELO", uid: "userName", sortable: true },
+    { name: "PARCELAS", uid: "soilCount", sortable: true },
+    { name: "ÁRBOLES", uid: "treeCount", sortable: true },
+    { name: "INDUSTRIAS", uid: "listEntitis", sortable: true },
+  ];
+
+  const [users, setUsers] = useState([]);
+  const [filterValue, setFilterValue] = useState("");
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]));
+  const [visibleColumns, setVisibleColumns] = useState(
+    new Set(INITIAL_VISIBLE_COLUMNS)
+  );
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "userName",
+    direction: "ascending",
+  });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
-  const [rows, setRows] = useState([]);
-  const columns = [
-    {
-      key: "userName",
-      label: "Rojanelo",
-    },
-    {
-      key: "soilCount",
-      label: "Parcelas",
-    },
-    {
-      key: "treeCount",
-      label: "Árboles",
-    },
-    {
-      key: "listEntitis",
-      label: "Industrias",
-    },
-  ];
 
   const [loaderRef, scrollerRef] = useInfiniteScroll({
     hasMore,
@@ -46,7 +55,7 @@ const Specks = () => {
       const response = await axios.get(
         `https://www.pixels-tools.somee.com/Speck/Page/${currentPage}`
       );
-      setRows(response.data.listSpeck);
+      setUsers(response.data.listSpeck);
       setHasMore(response.data.totalPages > 1);
       setIsLoading(false);
     } catch (error) {
@@ -61,7 +70,7 @@ const Specks = () => {
         `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
       );
       const newData = response.data.listSpeck;
-      setRows((prevRows) => [...prevRows, ...newData]);
+      setUsers((prevUsers) => [...prevUsers, ...newData]);
       setCurrentPage(nextPage);
       setHasMore(nextPage < response.data.totalPages);
     } catch (error) {
@@ -73,44 +82,166 @@ const Specks = () => {
     fetchData();
   }, []);
 
+  const hasSearchFilter = Boolean(filterValue);
+
+  const headerColumns = useMemo(() => {
+    if (visibleColumns === "all") return columns;
+
+    return columns.filter((column) =>
+      Array.from(visibleColumns).includes(column.uid)
+    );
+  }, [visibleColumns]);
+
+  const filteredItems = useMemo(() => {
+    let filteredUsers = [...users];
+
+    if (hasSearchFilter) {
+      filteredUsers = filteredUsers.filter((users) =>
+        users.userName.toLowerCase().includes(filterValue.toLowerCase())
+      );
+    }
+
+    return filteredUsers;
+  }, [users, filterValue]);
+
+  const items = useMemo(() => {
+    return [...filteredItems];
+  }, [currentPage, filteredItems]);
+
+  const sortedItems = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
+
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
+    });
+  }, [sortDescriptor, items]);
+
+  const renderCell = React.useCallback((item, columnKey) => {
+    const cellValue = item[columnKey];
+
+    switch (columnKey) {
+      case "listEntitis":
+        return (
+          <div className="flex">
+            {cellValue.map((entity) => (
+              <div key={entity.idEnt} className="w-8 h-8">
+                <img
+                  src={entity.img}
+                  alt={entity.name}
+                  className="w-full h-full object-cover object-left"
+                />
+              </div>
+            ))}
+          </div>
+        );
+      default:
+        return cellValue;
+    }
+  }, []);
+
+  const onSearchChange = React.useCallback((value) => {
+    if (value) {
+      setFilterValue(value);
+      setCurrentPage(1);
+    } else {
+      setFilterValue("");
+    }
+  }, []);
+
+  const onClear = React.useCallback(() => {
+    setFilterValue("");
+    setCurrentPage(1);
+  }, []);
+
+  const topContent = useMemo(() => {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between gap-3 items-end">
+          <Input
+            isClearable
+            autoComplete="off"
+            className="w-full sm:max-w-[44%]"
+            placeholder="Buscar Rojanelo..."
+            startContent={<Search />}
+            value={filterValue}
+            onClear={() => onClear()}
+            onValueChange={onSearchChange}
+          />
+          <div className="flex gap-3">
+            <Dropdown>
+              <DropdownTrigger className="hidden sm:flex">
+                <Button
+                  endContent={<Filter className="text-small" />}
+                  variant="flat"
+                >
+                  Filtros
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                disallowEmptySelection
+                aria-label="Filtros por columnas"
+                closeOnSelect={false}
+                selectedKeys={visibleColumns}
+                selectionMode="multiple"
+                onSelectionChange={setVisibleColumns}
+              >
+                {columns.map((column) => (
+                  <DropdownItem key={column.uid} className="capitalize">
+                    {capitalize(column.name)}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        </div>
+      </div>
+    );
+  }, [
+    filterValue,
+    visibleColumns,
+    users.length,
+    onSearchChange,
+    hasSearchFilter,
+  ]);
+
   return (
     <Table
-      isHeaderSticky
-      className="p-3 h-[90vh]"
+      className="p-2"
       aria-label="Specks de Rojanelos"
+      isHeaderSticky
+      classNames={{
+        wrapper: "h-[80vh]",
+      }}
+      sortDescriptor={sortDescriptor}
+      topContent={topContent}
+      topContentPlacement="outside"
+      onSelectionChange={setSelectedKeys}
+      onSortChange={setSortDescriptor}
       baseRef={scrollerRef}
       bottomContent={hasMore ? <Spinner ref={loaderRef} color="white" /> : null}
     >
-      <TableHeader columns={columns}>
-        {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+      <TableHeader isLoading={isLoading} columns={headerColumns}>
+        {(column) => (
+          <TableColumn
+            key={column.uid}
+            align={column.uid === "actions" ? "center" : "start"}
+            allowsSorting={column.sortable}
+          >
+            {column.name}
+          </TableColumn>
+        )}
       </TableHeader>
-      <TableBody isLoading={isLoading} items={rows}>
+      <TableBody emptyContent={"Cargando Rojanelos..."} items={sortedItems}>
         {(item) => (
           <TableRow key={item.userID}>
             {(columnKey) => (
-              <TableCell>
-                {columnKey === "listEntitis" ? (
-                  <div className="flex">
-                    {item.listEntitis.map((industry) => (
-                      <div key={industry.idEnt} className="w-8 h-8 ">
-                        <img
-                          src={industry.img}
-                          alt={industry.name}
-                          className="w-full h-full object-cover object-left"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  item[columnKey]
-                )}
-              </TableCell>
+              <TableCell>{renderCell(item, columnKey)}</TableCell>
             )}
           </TableRow>
         )}
       </TableBody>
     </Table>
   );
-};
-
-export default Specks;
+}
