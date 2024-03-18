@@ -68,7 +68,7 @@ export default function TableLands() {
     try {
       const nextPage = currentPage + 1;
       const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
+        `https://www.pixels-tools.somee.com/Lands/List`
       );
       const newData = response.data.listSpeck;
       setUsers((prevUsers) => [...prevUsers, ...newData]);
@@ -137,6 +137,9 @@ export default function TableLands() {
             ))}
           </div>
         );
+      case "class":
+        return cellValue.charAt(0).toUpperCase() + cellValue.slice(1);
+
       default:
         return cellValue;
     }
