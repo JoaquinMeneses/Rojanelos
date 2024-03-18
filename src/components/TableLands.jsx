@@ -19,11 +19,18 @@ import {
 import { Filter, Search } from "lucide-react";
 import { useInfiniteScroll } from "@nextui-org/use-infinite-scroll";
 
-const INITIAL_VISIBLE_COLUMNS = ["landOwner", "landname", "class", "entitis"];
+const INITIAL_VISIBLE_COLUMNS = [
+  "landOwner",
+  "numberLand",
+  "landname",
+  "class",
+  "entitis",
+];
 
 export default function TableLands() {
   const columns = [
     { name: "ROJANELO", uid: "landOwner", sortable: true },
+    { name: "N° LAND", uid: "numberLand", sortable: true },
     { name: "LAND", uid: "landname", sortable: true },
     { name: "TIPO", uid: "class", sortable: true },
     { name: "PARCELAS", uid: "soilCount", sortable: true },
