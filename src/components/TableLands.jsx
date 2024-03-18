@@ -18,28 +18,17 @@ import {
 } from "@nextui-org/react";
 import { Filter, Search } from "lucide-react";
 import { useInfiniteScroll } from "@nextui-org/use-infinite-scroll";
-import { apiUrl } from "@/utils/apiUrl";
 
-const INITIAL_VISIBLE_COLUMNS = ["userName", "allSkills"];
+const INITIAL_VISIBLE_COLUMNS = ["landOwner", "landname", "class", "entitis"];
 
-export default function TableLeaderboard() {
+export default function TableLands() {
   const columns = [
-    { name: "ROJANELO", uid: "userName", sortable: true },
-    { name: "ALL SKILLS", uid: "allSkills", sortable: true },
-    { name: "AVICULTURE", uid: "aviculture", sortable: true },
-    { name: "BEEKEEPING", uid: "beekeeping", sortable: true },
-    { name: "FARMING", uid: "farming", sortable: true },
-    { name: "FORESTRY", uid: "forestry", sortable: true },
-    { name: "MINING", uid: "mining", sortable: true },
-    { name: "SLUGGER", uid: "slugger", sortable: true },
-    { name: "CERAMICIST", uid: "ceramicist", sortable: true },
-    { name: "COOKING", uid: "cooking", sortable: true },
-    { name: "GRANGER", uid: "granger", sortable: true },
-    { name: "PETCARE", uid: "petcare", sortable: true },
-    { name: "REDIFFERENTIATOR", uid: "redifferentiator", sortable: true },
-    { name: "TEXTILER", uid: "textiler", sortable: true },
-    { name: "WINEMAKING", uid: "winemaking", sortable: true },
-    { name: "WOODWORK", uid: "woodwork", sortable: true },
+    { name: "ROJANELO", uid: "landOwner", sortable: true },
+    { name: "LAND", uid: "landname", sortable: true },
+    { name: "TIPO", uid: "class", sortable: true },
+    { name: "PARCELAS", uid: "soilCount", sortable: true },
+    { name: "ÁRBOLES", uid: "treeCount", sortable: true },
+    { name: "INDUSTRIAS", uid: "entitis", sortable: true },
   ];
 
   const [users, setUsers] = useState([]);
@@ -49,7 +38,7 @@ export default function TableLeaderboard() {
     new Set(INITIAL_VISIBLE_COLUMNS)
   );
   const [sortDescriptor, setSortDescriptor] = useState({
-    column: "allSkills",
+    column: "entitis",
     direction: "descending",
   });
 
@@ -64,8 +53,10 @@ export default function TableLeaderboard() {
 
   async function fetchData() {
     try {
-      const response = await axios.get(`${apiUrl}/rojanelos`);
-      setUsers(response.data.rojanelos);
+      const response = await axios.get(
+        `https://www.pixels-tools.somee.com/Lands/List`
+      );
+      setUsers(response.data);
       setHasMore(response.data.totalPages > 1);
       setIsLoading(false);
     } catch (error) {
@@ -76,7 +67,9 @@ export default function TableLeaderboard() {
   async function loadMoreData() {
     try {
       const nextPage = currentPage + 1;
-      const response = await axios.get(`${apiUrl}/rojanelos/?page=${nextPage}`);
+      const response = await axios.get(
+        `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
+      );
       const newData = response.data.listSpeck;
       setUsers((prevUsers) => [...prevUsers, ...newData]);
       setCurrentPage(nextPage);
@@ -105,7 +98,7 @@ export default function TableLeaderboard() {
 
     if (hasSearchFilter) {
       filteredUsers = filteredUsers.filter((users) =>
-        users.userName.toLowerCase().includes(filterValue.toLowerCase())
+        users.landOwner.toLowerCase().includes(filterValue.toLowerCase())
       );
     }
 
@@ -118,44 +111,11 @@ export default function TableLeaderboard() {
 
   const sortedItems = useMemo(() => {
     return [...items].sort((a, b) => {
-      let first, second;
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const cmp = first < second ? -1 : first > second ? 1 : 0;
 
-      switch (sortDescriptor.column) {
-        case "allSkills":
-        case "aviculture":
-        case "beekeeping":
-        case "farming":
-        case "forestry":
-        case "mining":
-        case "slugger":
-        case "ceramicist":
-        case "cooking":
-        case "granger":
-        case "petcare":
-        case "redifferentiator":
-        case "textiler":
-        case "winemaking":
-        case "woodwork":
-          first = Math.max(
-            ...a[sortDescriptor.column].map((skill) => skill.level)
-          );
-          second = Math.max(
-            ...b[sortDescriptor.column].map((skill) => skill.level)
-          );
-          break;
-        default:
-          first = a[sortDescriptor.column];
-          second = b[sortDescriptor.column];
-      }
-
-      let cmp =
-        (parseInt(first) || first) < (parseInt(second) || second) ? -1 : 1;
-
-      if (sortDescriptor.direction === "descending") {
-        cmp *= -1;
-      }
-
-      return cmp;
+      return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, items]);
 
@@ -163,24 +123,20 @@ export default function TableLeaderboard() {
     const cellValue = item[columnKey];
 
     switch (columnKey) {
-      case "allSkills":
-      case "aviculture":
-      case "beekeeping":
-      case "farming":
-      case "forestry":
-      case "mining":
-      case "slugger":
-      case "ceramicist":
-      case "cooking":
-      case "granger":
-      case "petcare":
-      case "redifferentiator":
-      case "textiler":
-      case "winemaking":
-      case "woodwork":
-        return cellValue.map((skill, index) => (
-          <p key={index}>{skill.level}</p>
-        ));
+      case "entitis":
+        return (
+          <div className="flex">
+            {cellValue.map((entity) => (
+              <div key={entity.idEnt} className="w-8 h-8">
+                <img
+                  src={entity.img}
+                  alt={entity.name}
+                  className="w-full h-full object-cover object-left"
+                />
+              </div>
+            ))}
+          </div>
+        );
       default:
         return cellValue;
     }
