@@ -40,6 +40,7 @@ export default function TableLeaderboard() {
     { name: "TEXTILER", uid: "textiler", sortable: true },
     { name: "WINEMAKING", uid: "winemaking", sortable: true },
     { name: "WOODWORK", uid: "woodwork", sortable: true },
+    { name: "BUSINESS", uid: "business", sortable: true },
   ];
 
   const [users, setUsers] = useState([]);
