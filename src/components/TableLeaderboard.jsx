@@ -137,6 +137,7 @@ export default function TableLeaderboard() {
         case "textiler":
         case "winemaking":
         case "woodwork":
+        case "business":
           first = Math.max(
             ...a[sortDescriptor.column].map((skill) => skill.level)
           );
@@ -179,6 +180,7 @@ export default function TableLeaderboard() {
       case "textiler":
       case "winemaking":
       case "woodwork":
+      case "business":
         return cellValue.map((skill, index) => (
           <p key={index}>{skill.level}</p>
         ));
@@ -235,7 +237,7 @@ export default function TableLeaderboard() {
               >
                 {columns.map((column) => (
                   <DropdownItem key={column.uid} className="capitalize">
-                    {capitalize(column.name)}
+                    <p className="text-xs">{capitalize(column.name)}</p>
                   </DropdownItem>
                 ))}
               </DropdownMenu>
