@@ -52,7 +52,7 @@ export default function TableSpecks() {
   async function fetchData() {
     try {
       const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Speck/Page/${currentPage}`
+        `https://beppolevi.azurewebsites.net/Speck/Page/${currentPage}`
       );
       setUsers(response.data.listSpeck);
       setHasMore(response.data.totalPages > 1);
@@ -66,7 +66,7 @@ export default function TableSpecks() {
     try {
       const nextPage = currentPage + 1;
       const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Speck/Page/${nextPage}`
+        `https://beppolevi.azurewebsites.net/Speck/Page/${nextPage}`
       );
       const newData = response.data.listSpeck;
       setUsers((prevUsers) => [...prevUsers, ...newData]);

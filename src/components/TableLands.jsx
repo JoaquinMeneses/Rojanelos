@@ -61,7 +61,7 @@ export default function TableLands() {
   async function fetchData() {
     try {
       const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Lands/List`
+        `https://beppolevi.azurewebsites.net/Lands/List`
       );
       setUsers(response.data);
       setHasMore(response.data.totalPages > 1);
@@ -75,7 +75,7 @@ export default function TableLands() {
     try {
       const nextPage = currentPage + 1;
       const response = await axios.get(
-        `https://www.pixels-tools.somee.com/Lands/List`
+        `https://beppolevi.azurewebsites.net/Lands/List`
       );
       const newData = response.data.listSpeck;
       setUsers((prevUsers) => [...prevUsers, ...newData]);
